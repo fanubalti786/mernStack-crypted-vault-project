@@ -6,6 +6,7 @@ const cors = require("cors");
 const app = express();
 const {connectDB} = require('./database/db')
 const { userRouter } = require("./routes/authenticationRoute");
+const {imageRouter} = require('./routes/uploadImageRoute');
 
 // Middleware
 app.use(cors());
@@ -19,6 +20,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", userRouter);
+app.use('/image', imageRouter);
 
 // Server
 const PORT = process.env.PORT ;

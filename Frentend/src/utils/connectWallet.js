@@ -17,9 +17,10 @@ export const connectWallet = async () => {
       const dataSignature = {
         signature
       }
-      const url = `http://localhost:9000/api/authentication?address=${selectedAccount}`
+      const url = `http://localhost:8000/api/authentication?address=${selectedAccount}`
       const res = await axios.post(url,dataSignature)
-      console.log(res.data);
+      const data = res.data
+      console.log("data",data);
 
 
 
