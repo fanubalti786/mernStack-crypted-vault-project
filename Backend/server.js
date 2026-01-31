@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 const app = express();
+const {connectDB} = require('./database/db')
 const { userRouter } = require("./routes/authenticationRoute");
 
 // Middleware
@@ -24,7 +25,13 @@ const PORT = process.env.PORT ;
 // const PORT = 8000;
 // console.log(process.env.port);
 
-
-app.listen(PORT, () => {
+const connetServer = async () => {
+  await connectDB();
+  app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT} 🚀`);
 });
+}
+
+connetServer();
+
+
