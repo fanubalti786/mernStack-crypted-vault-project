@@ -1,16 +1,18 @@
 const { ethers } = require("ethers");
+const jwt = require("jsonwebtoken");
 const {userModel} = require('../models/user')
 const authController = async (req, res, next) => {
   try {
     const { signature } = req.body;
     const { address} = req.query;
+  
     if (!signature) {
       throw new Error("Error 400 Signatur is invalid ");
     }
 
     const message = "Wellcome To Crypto Vault site";
     const recoverAddress = ethers.utils.verifyMessage(message, signature);
-
+    console.log("hell")
     // if (
     //   ethers.utils.getAddress(address) ===
     //   ethers.utils.getAddress(recoverAddress)
@@ -29,12 +31,20 @@ const authController = async (req, res, next) => {
         user = await userModel.create({userAddress:address});
         console.log(user);
       }
+
+      const token = jwt.sign({
+        address
+      },process.env.JWT_SECRET_KEY)
       res.status(200).json({
+        success: true,
         message: "authentication successful",
+        address: address,
+        token
       });
     }else
     {
       res.status(400).json({
+        success: false,
         message: "authentication failed 400"
       })
     }

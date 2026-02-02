@@ -1,5 +1,5 @@
 require("dotenv").config();
-
+const jwt = require("jsonwebtoken");
 const pinataSDK = require("@pinata/sdk");
 const { userModel } = require("../models/user");
 const { generateEncryptionKey } = require("../utils/generateKey");
@@ -36,7 +36,7 @@ const uploadToIpfsController = async (req, res) => {
     const userAddress = "0x07076d701275b618e2d08ebd959d8b6c7e0d4a2c";
 
     const user = await userModel.findOne({ userAddress });
-
+    console.log(user);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -55,7 +55,7 @@ const uploadToIpfsController = async (req, res) => {
       req.file.buffer,
       user.encryptionKey
     );
-    console.log("hello");
+    
     // ✅ upload
     const result = await pinata.pinJSONToIPFS({ encryptedData, iv });
 
