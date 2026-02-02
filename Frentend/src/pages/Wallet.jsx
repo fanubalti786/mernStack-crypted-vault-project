@@ -8,9 +8,9 @@ export default function Wallet() {
     const {selectedAccount} = web3State;
 
     const handleConnectWallet = async() => {
-        const {contractInstance,selectedAccount} = await connectWallet();
+        const {contractInstance,selectedAccount,userAddress} = await connectWallet();
         console.log(contractInstance,selectedAccount);
-        updateWeb3State({contractInstance,selectedAccount});
+        updateWeb3State({contractInstance,selectedAccount,userAddress});
 
     }
 
@@ -28,9 +28,6 @@ export default function Wallet() {
       >
         Connect Wallet
       </button>
-      <div className='text-4xl'>
-        {selectedAccount}
-      </div>
     </div>
   )
 }
