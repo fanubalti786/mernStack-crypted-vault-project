@@ -4,15 +4,12 @@ const authController = async (req, res, next) => {
   try {
     const { signature } = req.body;
     const { address} = req.query;
-    console.log("address",address,typeof(address));
     if (!signature) {
       throw new Error("Error 400 Signatur is invalid ");
     }
 
     const message = "Wellcome To Crypto Vault site";
-    console.log(signature)
     const recoverAddress = ethers.utils.verifyMessage(message, signature);
-    console.log("recover", recoverAddress, typeof(recoverAddress));
 
     // if (
     //   ethers.utils.getAddress(address) ===
@@ -22,7 +19,6 @@ const authController = async (req, res, next) => {
     //     message: "authentication successful",
     //   });
     // }
-    console.log("hello")
     if (address.toLowerCase() === recoverAddress.toLowerCase()) {
       const walletAddress = recoverAddress.toLowerCase();
       console.log("hello")

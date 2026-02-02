@@ -1,42 +1,82 @@
 require("dotenv").config();
-const { ethers } = require("ethers");
+
+const pinataSDK = require("@pinata/sdk");
 const { userModel } = require("../models/user");
 const { generateEncryptionKey } = require("../utils/generateKey");
 const { encryptFile } = require("../utils/fileEncryption");
-const uploadToIpfsController = async (req, res, next) => {
+
+// ✅ create pinata ONCE (performance)
+const pinata = new pinataSDK({
+  pinataApiKey: process.env.PINATA_API_KEY,
+  pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY,
+});
+
+
+// ✅ Verify only once at startup (NOT per request)
+(async () => {
   try {
-    console.log(req.file.buffer)
-    const address = "0x07076d701275b618e2D08eBd959d8B6c7e0d4A2C";
-    const userAddress = address.toLowerCase();
-    const user = await userModel.findOne({ userAddress: userAddress });
-    if (!user) {
-      throw new Error("user does not exist");
+    await pinata.testAuthentication();
+    console.log("✅ Pinata Connected");
+  } catch (err) {
+    console.error("❌ Pinata Auth Failed:", err.message);
+  }
+})();
+
+const uploadToIpfsController = async (req, res) => {
+  try {
+    // ✅ file safety
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
     }
-    if (user.encryptionKey === null) {
-      const encryptionKey = generateEncryptionKey(32);
-      user.encryptionKey = encryptionKey;
+
+    // ✅ later replace with req.user.address (auth)
+    const userAddress = "0x07076d701275b618e2d08ebd959d8b6c7e0d4a2c";
+
+    const user = await userModel.findOne({ userAddress });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // ✅ safer key init
+    if (!user.encryptionKey) {
+      user.encryptionKey = generateEncryptionKey(32);
       await user.save();
     }
 
+    // ✅ encryption
     const { encryptedData, iv } = encryptFile(
       req.file.buffer,
-      user.encryptionKey,
+      user.encryptionKey
     );
-    const pinataSDK = require("@pinata/sdk");
-    const pinata = new pinataSDK({
-      pinataApiKey: process.env.PINATA_API_KEY,
-      pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY,
+    console.log("hello");
+    // ✅ upload
+    const result = await pinata.pinJSONToIPFS({ encryptedData, iv });
+
+    // ✅ safety check
+    if (!result?.IpfsHash) {
+      throw new Error("IPFS upload failed");
+    }
+
+    return res.status(200).json({
+      success: true,
+      ipfsHash: result.IpfsHash,
+      message: "Image uploaded successfully",
     });
 
-    await pinata.testAuthentication();
-    const resPinata = await pinata.pinJSONToIPFS({ encryptedData, iv });
-    console.log(resPinata);
   } catch (error) {
-    console.log(error.message);
-    res.status(500).json({
-      message: "Server Error 500",
+    console.error("Upload Error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
 
-module.exports = { uploadToIpfsController }; // single export
+module.exports = { uploadToIpfsController };
