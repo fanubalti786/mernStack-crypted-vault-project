@@ -4,7 +4,6 @@ const authenticateToken = (req, res, next) => {
   try {
     const token = req.headers["authorization"];
     const selectedAccount = req.body.selectedAccount;
-    console.log(token,selectedAccount)
 
     if (!token || !selectedAccount) {
       return res.status(400).json({
@@ -14,16 +13,17 @@ const authenticateToken = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    console.log(decoded.address)
 
     if (decoded.address.toLowerCase() !== selectedAccount.toLowerCase()) {
-        console.log('failed')
-      return res.status(200).json({
+    console.log("hello")
+
+      return res.status(400).json({        
         success: false,
-        message: "Use Authorize User Address"
+        message: "Plz Use Authorize Address"
     })
     }
 
+    req.address = decoded.address;
     next();
   } catch (err) {
     return res.status(401).json({

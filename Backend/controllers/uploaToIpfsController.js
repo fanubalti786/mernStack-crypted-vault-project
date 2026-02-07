@@ -1,26 +1,10 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const pinataSDK = require("@pinata/sdk");
 const { userModel } = require("../models/user");
 const { generateEncryptionKey } = require("../utils/generateKey");
 const { encryptFile } = require("../utils/fileEncryption");
+const {pinata} = require("../utils/pinataConnection");
 
-// ✅ create pinata ONCE (performance)
-const pinata = new pinataSDK({
-  pinataApiKey: process.env.PINATA_API_KEY,
-  pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY,
-});
-
-
-// ✅ Verify only once at startup (NOT per request)
-(async () => {
-  try {
-    await pinata.testAuthentication();
-    console.log("✅ Pinata Connected");
-  } catch (err) {
-    console.error("❌ Pinata Auth Failed:", err.message);
-  }
-})();
 
 const uploadToIpfsController = async (req, res) => {
   try {
@@ -32,8 +16,7 @@ const uploadToIpfsController = async (req, res) => {
       });
     }
 
-    // ✅ later replace with req.user.address (auth)
-    const userAddress = "0x07076d701275b618e2d08ebd959d8b6c7e0d4a2c";
+    const userAddress = req.address;
 
     const user = await userModel.findOne({ userAddress });
     console.log(user);

@@ -7,5 +7,5 @@ const { authenticateToken } = require('../middlewares/authentication');
 
 
 router.post('/uploadImage', uploadUserImage, authenticateToken , uploadToIpfsController)
-const imageRouter = router;
-module.exports = {imageRouter};
+const uploadImageRouter = router;
+module.exports = {uploadImageRouter};

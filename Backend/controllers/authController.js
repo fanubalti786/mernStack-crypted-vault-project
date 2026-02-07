@@ -12,7 +12,6 @@ const authController = async (req, res, next) => {
 
     const message = "Wellcome To Crypto Vault site";
     const recoverAddress = ethers.utils.verifyMessage(message, signature);
-    console.log("hell")
     // if (
     //   ethers.utils.getAddress(address) ===
     //   ethers.utils.getAddress(recoverAddress)
@@ -23,9 +22,7 @@ const authController = async (req, res, next) => {
     // }
     if (address.toLowerCase() === recoverAddress.toLowerCase()) {
       const walletAddress = recoverAddress.toLowerCase();
-      console.log("hello")
       let user = await userModel.findOne({userAddress:walletAddress})
-      console.log("buy");
       if(!user)
       {
         user = await userModel.create({userAddress:address});
